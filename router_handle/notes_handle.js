@@ -48,7 +48,7 @@ exports.deleteNote = function(req, res){
 }
 
 exports.queryNotes = function(req, res){
-  const data = req.body
+  const data = req.query
   const {page, pageSize} = data
   const start = (page - 1)* pageSize
   delete(data.page)
