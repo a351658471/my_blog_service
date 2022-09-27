@@ -4,17 +4,25 @@ exports.saveProfile = function(req, res){
   const data = req.body
   let sqlStr = ''
   if(data.id != undefined){
+    let id = data.id
     sqlStr = "UPDATE profile SET ? WHERE id = ?"
-  }else{
-    sqlStr = "INSET INFO profile SET ?"
-  }
-  db.query(sqlStr, data, (err, result) => {
-    if(err)return res.send({code:-1, msg:err})
-    res.send({
-      code:0,
-      msg:'保存成功'
+    db.query(sqlStr, [data, id], (err, result) => {
+      if(err)return res.send({code:-1, msg:err})
+      res.send({
+        code:0,
+        msg:'保存成功'
+      })
     })
-  })
+  }else{
+    sqlStr = "INSERT INTO profile SET ?"
+    db.query(sqlStr, sqlData, (err, result) => {
+      if(err)return res.send({code:-1, msg:err})
+      res.send({
+        code:0,
+        msg:'保存成功'
+      })
+    })
+  }
 }
 
 exports.getProfile = function(req, res){
