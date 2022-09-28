@@ -3,7 +3,7 @@ const db = require('../db/index')
 exports.saveProfile = function(req, res){
   const data = req.body
   let sqlStr = ''
-  if(data.id != undefined){
+  if(data.id){
     let id = data.id
     sqlStr = "UPDATE profile SET ? WHERE id = ?"
     db.query(sqlStr, [data, id], (err, result) => {
@@ -15,10 +15,11 @@ exports.saveProfile = function(req, res){
     })
   }else{
     sqlStr = "INSERT INTO profile SET ?"
-    db.query(sqlStr, sqlData, (err, result) => {
+    db.query(sqlStr, data, (err, result) => {
       if(err)return res.send({code:-1, msg:err})
       res.send({
         code:0,
+        result:{id:result.insertId},
         msg:'保存成功'
       })
     })
