@@ -75,3 +75,12 @@ exports.queryNotes = function(req, res){
   })
   
 }
+
+exports.article = function(req, res){
+  const {id} = req.query
+  let sqlStr = 'SELECT * FROM notes WHERE id = ?'
+  db.query(sqlStr, id , (err, result)=> {
+    if(err) return res.send({code:-1,msg:err})
+    res.send({code:0,data:result[0]})
+  })
+}

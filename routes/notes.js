@@ -17,4 +17,7 @@ router.delete('/deleteNote/:id',notesHandle.deleteNote)
 //查询笔记
 router.get('/queryNotes',notesHandle.queryNotes)
 
+//根据id获取笔记 
+router.get('/article', notesHandle.article)
+
 module.exports = router;
