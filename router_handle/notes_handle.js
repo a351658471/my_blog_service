@@ -66,9 +66,10 @@ exports.queryNotes = function(req, res){
   const tempArr = JSON.stringify(data) === '{}'? [start, pageSize*1]: [...whereValue, start, pageSize*1]
   db.query(sqlStr, tempArr, (err, result) => {
     if(err) return res.send({code:-1,msg:err})
-    db.query('select found_rows()',(err_c, result_c) => {
+    const sqlCountStr = `SELECT  count(*) as total FROM notes ${where}`
+    db.query(sqlCountStr,tempArr, (err_c, result_c) => {
       if(err_c)return res.send({})
-      const total = result_c[0]['found_rows()']
+      const total = result_c[0].total
       res.send({code:0,result,total})
     })
     
