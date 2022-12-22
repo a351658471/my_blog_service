@@ -48,6 +48,7 @@ exports.deleteNote = function(req, res){
 }
 
 exports.queryNotes = function(req, res){
+  console.log('req.user',req.auth);
   const data = req.query
   const {page, pageSize} = data
   const start = (page - 1)* pageSize
@@ -72,7 +73,6 @@ exports.queryNotes = function(req, res){
       const total = result_c[0].total
       res.send({code:0,result,total})
     })
-    
   })
   
 }

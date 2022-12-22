@@ -10,9 +10,15 @@ var notesRouter = require('./routes/notes');
 var uploadRouter = require('./routes/upload');
 var profileRouter = require('./routes/profile');
 var skillsRouter = require('./routes/skills');
-
+var commentsRouter = require('./routes/comments');
+const expressJWT  = require('express-jwt')
+const global = require('./global')
 var app = express();
-
+app.use(
+  expressJWT.expressjwt({ secret: global.secretKey, algorithms: ["HS256"] }).unless({
+    path: [/^\/users\//,/^\/api\//],
+  })
+);
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -28,6 +34,7 @@ app.use('/notes', notesRouter);
 app.use('/upload', uploadRouter);
 app.use('/profile',profileRouter)
 app.use('/skills',skillsRouter)
+app.use('/comments',commentsRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -36,6 +43,9 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
+  if(err.name === 'UnauthorizedError'){
+    return res.send({code:401, message:'无效token'})
+  }
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

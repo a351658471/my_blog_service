@@ -1,9 +1,8 @@
 var express = require('express');
 var router = express.Router();
+const userHandle = require('../router_handle/user_handle')
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+router.post('/register',userHandle.register)
 
+router.get('/login',userHandle.login)
 module.exports = router;
