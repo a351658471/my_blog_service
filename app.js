@@ -16,7 +16,7 @@ const global = require('./global')
 var app = express();
 app.use(
   expressJWT.expressjwt({ secret: global.secretKey, algorithms: ["HS256"] }).unless({
-    path: [/^\/users\//,/^\/api\//],
+    path: [/^\/users\//,/^\/api\//,,/^\/notes\//],
   })
 );
 // view engine setup
