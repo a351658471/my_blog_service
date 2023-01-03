@@ -16,7 +16,7 @@ exports.register = function(req, res){
   })
 }
 
-exports.login = (req, res)=> {
+exports.userLogin = (req, res)=> {
     const data = req.query
     const keys = Object.keys(data)
     let where = ''
@@ -32,7 +32,7 @@ exports.login = (req, res)=> {
     db.query(sqlStr, tempValues, (err, result)=>{
       if(err) return res.send({code:-1,msg:err})
       if(result.length > 0){
-        const secret = jwt.sign({ userId: result[0].userId }, global.secretKey, { expiresIn: '300s' })
+        const secret = jwt.sign({ userId: result[0].userId }, global.secretKey, { expiresIn: '604800s' })
         res.send({
               code: 0,
               message: '登录成功',
@@ -45,4 +45,35 @@ exports.login = (req, res)=> {
         })
       }
     })
+}
+
+exports.adminLogin = (req, res)=> {
+  const data = req.query
+  const keys = Object.keys(data)
+  let where = ''
+  tempValues = []
+  // console.log('tempValues',tempValues);
+  keys.forEach(( key, index ) => {
+    if(index ===0 )where = 'WHERE '
+    where += `${ key } = ?`
+    tempValues.push(data[key])
+    if(index < keys.length -1)where += 'and '
+  })
+  const sqlStr =`SELECT * FROM admin ${where}`
+  db.query(sqlStr, tempValues, (err, result)=>{
+    if(err) return res.send({code:-1,msg:err})
+    if(result.length > 0){
+      const secret = jwt.sign({ userId: result[0].id }, global.secretKey, { expiresIn: '604800s' })
+      res.send({
+            code: 0,
+            message: '登录成功',
+            secret
+          })
+    }else{
+      res.send({
+          status: -1,
+          message: '账号或密码错误'
+      })
+    }
+  })
 }
