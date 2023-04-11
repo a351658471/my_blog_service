@@ -1,5 +1,5 @@
 const db = require('../db/index')
-
+const notesHandle = require('./notes_handle')
 exports.addComment = (req, res)=>{
   const from_id = req.auth.userId
   const createTime = new Date().getTime().toString()
@@ -7,13 +7,12 @@ exports.addComment = (req, res)=>{
   const status = 0
   const praise = 0
   const data = {...req.body, id, createTime,from_id, status, praise}
-  console.log('data',data);
   const sqlStr = "INSERT INTO comments SET ?"
   db.query(sqlStr, data, (err,  result)=> {
     if(err){
-      console.log('err',err);
       return res.send({code:-1,msg:'评论失败'})
     }
+    notesHandle.noteHotChange(data.articleId, 'comment')
     res.send({
       code:0,
       msg:'评论成功',
@@ -32,37 +31,43 @@ exports.queryComment = (req, res)=> {
   let where = ''
   const tempValues = []
   const keys = Object.keys(data)
-  console.log('keys',keys);
   keys.forEach(( key, index ) => {
     if(index ===0 )where = 'WHERE '
     where += `${ key } = ?`
     tempValues.push(data[key])
     if(index < keys.length -1)where += 'and '
   })
-  console.log('where',where);
-  const sqlStr =`SELECT SQL_CALC_FOUND_ROWS * FROM comments ${where}  LIMIT ?, ?`
+  const sqlStr =`SELECT SQL_CALC_FOUND_ROWS * FROM comments ${where} ORDER BY createTime DESC  LIMIT ?, ?`
   const tempArr = JSON.stringify(data) === '{}'? [start, pageSize*1]: [...tempValues, start, pageSize*1]
   db.query(sqlStr, tempArr, (err, result) => {
     if(err) return res.send({code:-1,msg:err})
     result.forEach(item => {
       if(users[item.from_id]){
-        item.from_nickName = users[item.from_id]
+        item.from_nickName = users[item.from_id].nickName
+        item.from_color = users[item.from_id].color
       }else{
-        const userSqlStr = `SELECT nickName FROM users WHERE userId = ?`
+        const userSqlStr = `SELECT nickName,color FROM users WHERE userId = ?`
         db.query(userSqlStr, item.from_id, (err, userData)=> {
           if(err)return res.send({code:-1,msg:err})
-          users[item.from_id] = userData[0].nickName
+          users[item.from_id] ={
+            nickName:userData[0].nickName,
+            color:userData[0].color
+          }
           item.from_nickName = userData[0].nickName
+          item.from_color = userData[0].color
         })
       }
       if(item.to_uid){
         if(users[item.to_uid]){
-          item.to_nickName = users[item.to_uid]
+          item.to_nickName = users[item.to_uid].nickName
         }else{
-          const userSqlStr = `SELECT nickName FROM users WHERE userId = ?`
+          const userSqlStr = `SELECT nickName,color FROM users WHERE userId = ?`
           db.query(userSqlStr, item.to_uid, (err, userData)=> {
             if(err)return res.send({code:-1,msg:err})
-            users[item.to_uid] = userData[0].nickName
+            users[item.to_uid] = {
+              nickName:userData[0].nickName,
+              color:userData[0].color,
+            }
             item.to_nickName = userData[0].nickName
           })
         }

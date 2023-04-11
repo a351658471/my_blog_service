@@ -28,16 +28,38 @@ exports.editNote = function(req,res){
   })
 }
 
-exports.noteHotChange = function(req, res){
-  const { type } = req.params
-  const { id } = req.body
-  const sqlStr = `UPDATE notes SET ${type } = ${type} + 1  WHERE id = ?`
+const noteHotChange = function(id, type, isAdd=true, res){
+  const sqlStr = `UPDATE notes SET ${type } = ${type} ${isAdd?'+':'-'} 1  WHERE id = ?`
   db.query(sqlStr, id, (err, result) => {
     if(err) return res.send({code:-1,msg:err})
-    res.send({code:0})
+    // res.send({code:0})
   })
 }
-
+exports.noteStarChange = function(req, res){
+  let { id, isAdd, userId} = req.query
+  noteHotChange(id, 'star', isAdd,res)
+  const queryUserStr = `SELECT stars FROM users WHERE userId = '${userId}'`
+  db.query(queryUserStr, (user_err, user_result)=> {
+    if(user_err) return res.send({code:-1,msg:user_err})
+    console.log('user_result',user_result);
+    let stars = user_result[0].stars??''
+    const arr =stars===''?[]: stars.split(',')
+    if(arr.indexOf(id)==-1 && isAdd){
+      console.log('===============');
+      arr.push(id)
+      stars = arr.join(',')
+    }else if(arr.indexOf(id)!=-1 && !isAdd){
+      arr.splice(arr.indexOf(id),1)
+      stars = arr.join(',')
+    }
+    const userStarsStr = `UPDATE users SET stars = ? WHERE userId = '${userId}'`
+    db.query(userStarsStr, stars, (err, result)=> {
+      if(err)return res.send({code:-1,msg:err})
+      res.send({code:0})
+    })
+  })
+  
+}
 exports.deleteNote = function(req, res){
   const { id } = req.params
   const sqlStr = "DELETE FROM notes WHERE id = ?"
@@ -48,7 +70,6 @@ exports.deleteNote = function(req, res){
 }
 
 exports.queryNotes = function(req, res){
-  console.log('req.user',req.auth);
   const data = req.query
   const {page, pageSize} = data
   const start = (page - 1)* pageSize
@@ -82,6 +103,8 @@ exports.article = function(req, res){
   let sqlStr = 'SELECT * FROM notes WHERE id = ?'
   db.query(sqlStr, id , (err, result)=> {
     if(err) return res.send({code:-1,msg:err})
+    noteHotChange(id, 'views',true, res)
     res.send({code:0,data:result[0]})
   })
 }
+exports.noteHotChange = noteHotChange

@@ -11,12 +11,15 @@ var uploadRouter = require('./routes/upload');
 var profileRouter = require('./routes/profile');
 var skillsRouter = require('./routes/skills');
 var commentsRouter = require('./routes/comments');
+var auth_commentsRouter = require('./routes/auth_comments');
+var tagsRouter = require('./routes/tags');
+var chatgptRouter = require('./routes/chatgpt');
 const expressJWT  = require('express-jwt')
 const global = require('./global')
 var app = express();
 app.use(
   expressJWT.expressjwt({ secret: global.secretKey, algorithms: ["HS256"] }).unless({
-    path: [/^\/users\//,/^\/notes\//,/^\/public\//],
+    path: [/^\/users\//,/^\/notes\//,/^\/comments\//,/^\/public\//,/^\/tags\//,/^\/chatgpt\//],
   })
 );
 // view engine setup
@@ -35,6 +38,9 @@ app.use('/upload', uploadRouter);
 app.use('/profile',profileRouter)
 app.use('/skills',skillsRouter)
 app.use('/comments',commentsRouter)
+app.use('/auth_comments',auth_commentsRouter)
+app.use('/tags',tagsRouter)
+app.use('/chatgpt',chatgptRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

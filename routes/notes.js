@@ -8,8 +8,8 @@ router.post('/addNote',notesHandle.addNote)
 //笔记编辑
 router.post('/editNote',notesHandle.editNote)
 
-//浏览、评论笔记
-router.put('/noteHotChange/:type',notesHandle.noteHotChange)
+//赞
+router.put('/noteStarChange',notesHandle.noteStarChange)
 
 //删除编辑
 router.delete('/deleteNote/:id',notesHandle.deleteNote)
