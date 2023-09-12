@@ -6,7 +6,8 @@ exports.addComment = (req, res)=>{
   const id = (Math.random()+ new Date().getTime()).toString(32).slice(0,8)
   const status = 0
   const praise = 0
-  const data = {...req.body, id, createTime,from_id, status, praise}
+  const audit = 0
+  const data = {...req.body, id, createTime,from_id, status, praise, audit}
   const sqlStr = "INSERT INTO comments SET ?"
   db.query(sqlStr, data, (err,  result)=> {
     if(err){
